@@ -42,14 +42,14 @@ export default function Dashboard() {
 
   if (loadingAuth) {
     return (
-      <Column fillWidth minHeight="100vh" vertical="center" horizontal="center">
+      <Column fillWidth style={{ minHeight: '100vh' }} vertical="center" horizontal="center">
         <Text variant="heading-default-l" onBackground="neutral-weak">Authenticating...</Text>
       </Column>
     );
   }
 
   return (
-    <Column fillWidth minHeight="100vh" paddingX="l" paddingY="xl" gap="32" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+    <Column fillWidth paddingX="l" paddingY="xl" gap="32" style={{ maxWidth: '1200px', margin: '0 auto', minHeight: '100vh' }}>
       
       {/* Dashboard Header */}
       <RevealFx translateY="4" fillWidth>
