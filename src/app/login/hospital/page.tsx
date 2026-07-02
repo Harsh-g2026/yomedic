@@ -11,8 +11,9 @@ import {
   Row,
   Line,
 } from "@once-ui-system/core";
-import { auth } from "@/lib/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "@/lib/firebase";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import RequestAccessModal from "@/components/RequestAccessModal";
 
 export default function HospitalLogin() {
@@ -29,7 +30,21 @@ export default function HospitalLogin() {
     setLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Fetch role from Firestore before allowing redirect
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const role = userDoc.exists() ? userDoc.data()?.role : null;
+
+      if (role !== "staff") {
+        // Role mismatch — sign out immediately and block routing
+        await signOut(auth);
+        setError("Please use the District Administrator portal to log in.");
+        return;
+      }
+
+      // Role matches — allow redirect
       router.push("/dashboard/hospital");
     } catch (err: any) {
       setError(err.message || "Failed to sign in. Please check your credentials.");
