@@ -2,15 +2,18 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
 import { Fade, Flex, Line, Row, ToggleButton } from "@once-ui-system/core";
 
-import { routes, display } from "@/resources";
+import { routes, display, person } from "@/resources";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageToggle } from "./LanguageToggle";
 import styles from "./Header.module.scss";
+
+
 
 type TimeDisplayProps = {
   timeZone: string;
@@ -47,6 +50,7 @@ export default TimeDisplay;
 
 export const Header = () => {
   const pathname = usePathname() ?? "";
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -83,45 +87,45 @@ export const Header = () => {
           position: "fixed",
         }}
       >
-        <Row paddingLeft="12" fillWidth vertical="center" textVariant="body-default-s" />
+
+        <Row paddingLeft="12" fillWidth vertical="center" textVariant="body-default-s">
+          {display.location && <Row s={{ hide: true }}>{person.location}</Row>}
+        </Row>
         <Row fillWidth horizontal="center">
-          {!isLoggedIn && (
-            <Row
-              background="page"
-              border="neutral-alpha-weak"
-              radius="m-4"
-              shadow="l"
-              padding="4"
-              horizontal="center"
-              zIndex={1}
-            >
-              <Row gap="4" vertical="center" textVariant="body-default-s" suppressHydrationWarning>
-                {routes["/"] && (
-                  <ToggleButton prefixIcon="home" href="/" selected={pathname === "/"} />
-                )}
-                {routes["/login"] && (
-                  <>
-                    <Line background="neutral-alpha-medium" vert maxHeight="24" />
-                    <Row s={{ hide: true }}>
-                      <ToggleButton
-                        prefixIcon="person"
-                        href="/login"
-                        label="Login"
-                        selected={pathname === "/login"}
-                      />
-                    </Row>
-                    <Row hide s={{ hide: false }}>
-                      <ToggleButton
-                        prefixIcon="person"
-                        href="/login"
-                        selected={pathname === "/login"}
-                      />
-                    </Row>
-                  </>
-                )}
-              </Row>
+          <Row
+            background="page"
+            border="neutral-alpha-weak"
+            radius="m-4"
+            shadow="l"
+            padding="4"
+            horizontal="center"
+            zIndex={1}
+          >
+            <Row gap="4" vertical="center" textVariant="body-default-s" suppressHydrationWarning>
+              {routes["/"] && (
+                <ToggleButton prefixIcon="home" href="/" selected={pathname === "/"} />
+              )}
+              {routes["/login"] && (
+                <>
+                  <Line background="neutral-alpha-medium" vert maxHeight="24" />
+                  {!isLoggedIn ? (
+                    <ToggleButton
+                      prefixIcon="person"
+                      href="/login"
+                      label="Login"
+                      selected={pathname === "/login"}
+                    />
+                  ) : (
+                    <ToggleButton
+                      prefixIcon="person"
+                      href="/login"
+                      selected={pathname === "/login"}
+                    />
+                  )}
+                </>
+              )}
             </Row>
-          )}
+          </Row>
         </Row>
         <Flex fillWidth horizontal="end" vertical="center">
           <Flex
@@ -131,16 +135,12 @@ export const Header = () => {
             textVariant="body-default-s"
             gap="20"
           >
-            <Flex s={{ hide: true }}>
-              {display.time && <TimeDisplay timeZone="UTC" />}
-            </Flex>
+            {display.time && <TimeDisplay timeZone="UTC" />}
             <LanguageToggle />
-            {display.themeSwitcher && (
-              <ThemeToggle />
-            )}
           </Flex>
         </Flex>
       </Row>
     </>
+
   );
 };

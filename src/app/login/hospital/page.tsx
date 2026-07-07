@@ -42,7 +42,9 @@ export default function HospitalLogin() {
       if (role !== "staff") {
         // Role mismatch — sign out immediately and block routing
         await signOut(auth);
+
         setError(t("adminRoleMismatch"));
+
         return;
       }
 
@@ -104,12 +106,16 @@ export default function HospitalLogin() {
 
           <RevealFx translateY="4" fillWidth horizontal="center" paddingBottom="8">
             <Heading wrap="balance" variant="display-strong-s">
+
               {t("hospitalLogin")}
+
             </Heading>
           </RevealFx>
           <RevealFx translateY="8" delay={0.1} fillWidth horizontal="center" paddingBottom="24">
             <Text wrap="balance" onBackground="neutral-weak" variant="body-default-m" align="center">
+
               {t("hospitalLoginDesc")}
+
             </Text>
           </RevealFx>
 
@@ -134,7 +140,10 @@ export default function HospitalLogin() {
               )}
 
               <Column gap="8" fillWidth>
+
                 <Text variant="label-strong-m">{t("emailAddress")}</Text>
+
+
                 <input
                   id="hospital-email"
                   type="email"
@@ -157,7 +166,10 @@ export default function HospitalLogin() {
               </Column>
 
               <Column gap="8" fillWidth>
+
                 <Text variant="label-strong-m">{t("password")}</Text>
+
+
                 <input
                   id="hospital-password"
                   type="password"
@@ -185,7 +197,9 @@ export default function HospitalLogin() {
                   onBackground="brand-medium"
                   style={{ cursor: "pointer" }}
                 >
+
                   {t("forgotPassword")}
+
                 </Text>
               </Row>
 
@@ -197,7 +211,9 @@ export default function HospitalLogin() {
                 weight="strong"
                 fillWidth
               >
+
                 {loading ? t("signingIn") : t("signInDashboard")}
+
               </Button>
             </form>
           </RevealFx>
@@ -212,7 +228,9 @@ export default function HospitalLogin() {
                   onBackground="neutral-medium"
                   style={{ whiteSpace: "nowrap", flexShrink: 0 }}
                 >
+
                   {t("newFacility")}
+
                 </Text>
                 <Line background="neutral-alpha-medium" />
               </Row>
@@ -224,7 +242,9 @@ export default function HospitalLogin() {
                 fillWidth
                 onClick={() => setShowAccessModal(true)}
               >
+
                 {t("requestAccess")}
+
               </Button>
 
               <Text
@@ -233,7 +253,9 @@ export default function HospitalLogin() {
                 align="center"
                 style={{ maxWidth: "320px" }}
               >
+
                 {t("requestAccessDesc")}
+
               </Text>
             </Column>
           </RevealFx>
@@ -241,7 +263,9 @@ export default function HospitalLogin() {
           {/* Back to selection */}
           <RevealFx translateY="16" delay={0.4} fillWidth horizontal="center" paddingTop="16">
             <Button variant="tertiary" size="s" href="/login" prefixIcon="arrowLeft">
+
               {t("backToPortal")}
+
             </Button>
           </RevealFx>
         </Column>

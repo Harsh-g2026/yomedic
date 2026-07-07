@@ -16,13 +16,51 @@ import {
   Badge,
   Line,
   Icon,
+  useToast,
 } from "@once-ui-system/core";
 
+// — Types ——————————————————————————————
 type JoinStatus = "not_submitted" | "pending" | "approved" | "rejected" | "loading";
 
+interface DbQuery {
+  id: string;
+  hospitalId: string;
+  hospitalName: string;
+  subject: string;
+  message: string;
+  priority: string;
+  status: string;
+  reply: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const PRIORITIES = ["Low", "Medium", "High", "Emergency"] as const;
+
+// — Status Badge Color Helper ——————————————————
+function statusBadgeStyle(status: string) {
+  switch (status) {
+    case "Pending": return { background: "#f59e0b", color: "#000" };
+    case "In Progress": return { background: "#3b82f6", color: "#fff" };
+    case "Resolved": return { background: "#10b981", color: "#fff" };
+    default: return { background: "rgba(255,255,255,0.1)", color: "#fff" };
+  }
+}
+
+function priorityBadgeStyle(priority: string) {
+  switch (priority) {
+    case "Emergency": return { background: "#ef4444", color: "#fff" };
+    case "High": return { background: "#f97316", color: "#fff" };
+    case "Medium": return { background: "#f59e0b", color: "#000" };
+    default: return { background: "#6b7280", color: "#fff" };
+  }
+}
+
+// — Main Component ——————————————————————————
 export default function HospitalDashboard() {
   const t = useTranslations("Dashboard");
   const tHeader = useTranslations("Header");
+
   const [loadingAuth, setLoadingAuth] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [joinStatus, setJoinStatus] = useState<JoinStatus>("loading");
@@ -31,6 +69,12 @@ export default function HospitalDashboard() {
   const [staffPresent, setStaffPresent] = useState<number | null>(null);
   const [staffTotal, setStaffTotal] = useState<number | null>(null);
   const [medicineAvailability, setMedicineAvailability] = useState<number | null>(null);
+  const [querySubject, setQuerySubject] = useState("");
+  const [queryText, setQueryText] = useState("");
+  const [queryPriority, setQueryPriority] = useState<string>("Medium");
+  const [submittingQuery, setSubmittingQuery] = useState(false);
+  const [dbQueries, setDbQueries] = useState<DbQuery[]>([]);
+  const [loadingQueries, setLoadingQueries] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -86,6 +130,7 @@ export default function HospitalDashboard() {
     }
   }, [user?.email]);
 
+  // — Dashboard metrics (blood / patients / staff / medicine) ——————————————————
   const fetchDashboardMetrics = useCallback(async () => {
     try {
       const todayStr = new Date().toISOString().split("T")[0];
@@ -150,10 +195,27 @@ export default function HospitalDashboard() {
     }
   }, []);
 
+  // — Load this hospital's queries from DB ——————————————————
+  const loadDbQueries = useCallback(async (uid: string) => {
+    setLoadingQueries(true);
+    try {
+      const res = await fetch(`/api/queries?hospitalId=${encodeURIComponent(uid)}`, {
+        cache: "no-store",
+      });
+      const json = await res.json();
+      if (res.ok) setDbQueries(json.data as DbQuery[]);
+    } catch (err) {
+      console.error("Failed to load queries:", err);
+    } finally {
+      setLoadingQueries(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!loadingAuth && user) {
       checkJoinStatus();
       fetchDashboardMetrics();
+      loadDbQueries(user.uid);
 
       // Refetch when tab gains focus
       window.addEventListener("focus", fetchDashboardMetrics);
@@ -168,6 +230,48 @@ export default function HospitalDashboard() {
     router.push("/login/hospital");
   };
 
+  // — Send Query handler ——————————————————
+  const { addToast } = useToast();
+  const handleSendQuery = async () => {
+    if (!querySubject.trim()) {
+      addToast({ variant: "danger", message: "Please enter a subject." });
+      return;
+    }
+    if (!queryText.trim()) {
+      addToast({ variant: "danger", message: "Please describe your query." });
+      return;
+    }
+    if (!user) return;
+
+    setSubmittingQuery(true);
+    try {
+      const res = await fetch("/api/queries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          hospitalId: user.uid,
+          hospitalName: user.displayName || user.email || user.uid,
+          subject: querySubject.trim(),
+          message: queryText.trim(),
+          priority: queryPriority,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Failed to submit.");
+
+      setDbQueries((prev) => [json.data as DbQuery, ...prev]);
+      setQuerySubject("");
+      setQueryText("");
+      setQueryPriority("Medium");
+      addToast({ variant: "success", message: "Query sent successfully to District Administration." });
+    } catch (err: any) {
+      addToast({ variant: "danger", message: err.message || "Could not send query." });
+    } finally {
+      setSubmittingQuery(false);
+    }
+  };
+
+  // — Loading state ——————————————————
   if (loadingAuth) {
     return (
       <Column fillWidth style={{ minHeight: "100vh" }} vertical="center" horizontal="center">
@@ -175,6 +279,9 @@ export default function HospitalDashboard() {
       </Column>
     );
   }
+
+
+
 
   return (
     <Column
@@ -236,18 +343,18 @@ export default function HospitalDashboard() {
               joinStatus === "approved"
                 ? "var(--success-alpha-weak)"
                 : joinStatus === "pending"
-                ? "var(--warning-alpha-weak)"
-                : joinStatus === "rejected"
-                ? "var(--danger-alpha-weak)"
-                : "var(--brand-alpha-weak)",
+                  ? "var(--warning-alpha-weak)"
+                  : joinStatus === "rejected"
+                    ? "var(--danger-alpha-weak)"
+                    : "var(--brand-alpha-weak)",
             border:
               joinStatus === "approved"
                 ? "1px solid var(--success-alpha-medium)"
                 : joinStatus === "pending"
-                ? "1px solid var(--warning-alpha-medium)"
-                : joinStatus === "rejected"
-                ? "1px solid var(--danger-alpha-medium)"
-                : "1px solid var(--brand-alpha-medium)",
+                  ? "1px solid var(--warning-alpha-medium)"
+                  : joinStatus === "rejected"
+                    ? "1px solid var(--danger-alpha-medium)"
+                    : "1px solid var(--brand-alpha-medium)",
             borderRadius: "16px",
           }}
         >
@@ -280,10 +387,10 @@ export default function HospitalDashboard() {
               {joinStatus === "approved"
                 ? "Your facility is connected to the district dashboard. Your data reports are visible to the district administrator."
                 : joinStatus === "pending"
-                ? "Your join request has been submitted and is awaiting review by the district administrator."
-                : joinStatus === "rejected"
-                ? "Your previous request was rejected. Please contact the district health office or resubmit with updated documents."
-                : "Connect your facility to the district dashboard to share reports and receive AI-driven recommendations."}
+                  ? "Your join request has been submitted and is awaiting review by the district administrator."
+                  : joinStatus === "rejected"
+                    ? "Your previous request was rejected. Please contact the district health office or resubmit with updated documents."
+                    : "Connect your facility to the district dashboard to share reports and receive AI-driven recommendations."}
             </Text>
           </Column>
           {(joinStatus === "not_submitted" || joinStatus === "rejected") && (
@@ -361,10 +468,10 @@ export default function HospitalDashboard() {
                   medicineAvailability === null
                     ? "neutral-strong"
                     : medicineAvailability >= 70
-                    ? "success-strong"
-                    : medicineAvailability >= 40
-                    ? "warning-strong"
-                    : "danger-strong"
+                      ? "success-strong"
+                      : medicineAvailability >= 40
+                        ? "warning-strong"
+                        : "danger-strong"
                 }
               >
                 {medicineAvailability !== null ? `${medicineAvailability}%` : "..."}
@@ -552,6 +659,322 @@ export default function HospitalDashboard() {
       <RevealFx translateY="16" delay={0.3} fillWidth>
         <Column padding="32" background="surface" border="neutral-alpha-weak" radius="l" gap="24">
           <Heading variant="heading-strong-l">{t("quickActions")}</Heading>
+        </Column>
+      </RevealFx>
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* Send Query to District Administration                             */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      <RevealFx translateY="12" delay={0.15} fillWidth>
+        <Column
+          fillWidth
+          padding="32"
+          gap="20"
+          style={{
+            background: "var(--surface-background)",
+            border: "1px solid var(--neutral-border-medium)",
+            borderRadius: "20px",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          {/* accent top bar */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: "3px",
+              background: "linear-gradient(90deg, #6366f1, #8b5cf6, #a855f7)",
+            }}
+          />
+
+          <Row gap="12" vertical="center" paddingTop="4">
+            <div
+              style={{
+                width: "42px",
+                height: "42px",
+                borderRadius: "12px",
+                background: "linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15))",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "20px",
+              }}
+            >
+              📨
+            </div>
+            <Column gap="2">
+              <Heading variant="heading-strong-l">Need Assistance?</Heading>
+              <Text variant="body-default-s" onBackground="neutral-weak">
+                Send your queries, requests, complaints, or resource requirements directly to the District Administration.
+              </Text>
+            </Column>
+          </Row>
+
+          <textarea
+            value={querySubject}
+            onChange={(e) => setQuerySubject(e.target.value)}
+            placeholder="Query subject (e.g. Oxygen Cylinder Request)"
+            rows={1}
+            style={{
+              width: "100%",
+              padding: "12px 16px",
+              borderRadius: "14px",
+              border: "1px solid var(--neutral-border-medium)",
+              background: "rgba(255,255,255,0.03)",
+              color: "var(--neutral-on-background-strong)",
+              fontSize: "15px",
+              fontFamily: "inherit",
+              resize: "none",
+              outline: "none",
+              transition: "border-color 0.2s",
+            }}
+            onFocus={(e) => (e.currentTarget.style.borderColor = "#6366f1")}
+            onBlur={(e) => (e.currentTarget.style.borderColor = "var(--neutral-border-medium)")}
+          />
+
+          {/* Priority selector */}
+          <Row gap="8" vertical="center">
+            <Text variant="label-strong-s" onBackground="neutral-weak" style={{ minWidth: 80 }}>Priority:</Text>
+            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+              {PRIORITIES.map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setQueryPriority(p)}
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: "20px",
+                    border: queryPriority === p ? "2px solid #6366f1" : "1px solid rgba(255,255,255,0.15)",
+                    cursor: "pointer",
+                    fontSize: "13px",
+                    fontWeight: queryPriority === p ? 700 : 400,
+                    transition: "all 0.15s",
+                    ...priorityBadgeStyle(p),
+                    opacity: queryPriority === p ? 1 : 0.55,
+                  }}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </Row>
+
+          <textarea
+            value={queryText}
+            onChange={(e) => setQueryText(e.target.value)}
+            placeholder={`Describe your query in detail...\nExample: "We require 20 additional oxygen cylinders urgently."`}
+            rows={4}
+            style={{
+              width: "100%",
+              padding: "16px",
+              borderRadius: "14px",
+              border: "1px solid var(--neutral-border-medium)",
+              background: "rgba(255,255,255,0.03)",
+              color: "var(--neutral-on-background-strong)",
+              fontSize: "15px",
+              fontFamily: "inherit",
+              resize: "vertical",
+              outline: "none",
+              transition: "border-color 0.2s",
+            }}
+            onFocus={(e) => (e.currentTarget.style.borderColor = "#6366f1")}
+            onBlur={(e) => (e.currentTarget.style.borderColor = "var(--neutral-border-medium)")}
+          />
+
+          <Row gap="12">
+            <Button
+              variant="primary"
+              size="m"
+              weight="strong"
+              onClick={handleSendQuery}
+            // disabled prop type might not support boolean directly
+            >
+              {submittingQuery ? "Sending…" : "Send Query"}
+            </Button>
+            <Button
+              variant="secondary"
+              size="m"
+              onClick={() => { setQuerySubject(""); setQueryText(""); setQueryPriority("Medium"); }}
+            >
+              Clear
+            </Button>
+          </Row>
+        </Column>
+      </RevealFx>
+
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* My Submitted Queries                                               */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      <RevealFx translateY="12" delay={0.2} fillWidth>
+        <Column
+          fillWidth
+          padding="32"
+          gap="20"
+          style={{
+            background: "var(--surface-background)",
+            border: "1px solid var(--neutral-border-medium)",
+            borderRadius: "20px",
+          }}
+        >
+          <Heading variant="heading-strong-l">My Submitted Queries</Heading>
+
+          {loadingQueries ? (
+            <Text variant="body-default-m" onBackground="neutral-weak">Loading queries…</Text>
+          ) : dbQueries.length === 0 ? (
+            <Text variant="body-default-m" onBackground="neutral-weak">
+              No queries submitted yet. Use the form above to send your first query.
+            </Text>
+          ) : (
+            <>
+              {/* Table header */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "2fr 1fr 1fr 2fr 1fr",
+                  gap: "8px",
+                  padding: "10px 16px",
+                  borderRadius: "12px",
+                  background: "rgba(255,255,255,0.04)",
+                }}
+              >
+                {["Subject", "Priority", "Status", "District Reply", "Date"].map((h) => (
+                  <Text key={h} variant="label-strong-s" onBackground="neutral-weak">{h}</Text>
+                ))}
+              </div>
+
+              {/* Rows */}
+              <Column gap="8">
+                {dbQueries.map((q) => (
+                  <div
+                    key={q.id}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "2fr 1fr 1fr 2fr 1fr",
+                      gap: "8px",
+                      alignItems: "center",
+                      padding: "14px 16px",
+                      borderRadius: "12px",
+                      background: "rgba(255,255,255,0.02)",
+                      border: "1px solid rgba(255,255,255,0.04)",
+                    }}
+                  >
+                    <Text variant="body-default-s" onBackground="neutral-strong">{q.subject}</Text>
+                    <span
+                      style={{
+                        display: "inline-block",
+                        padding: "3px 10px",
+                        borderRadius: "20px",
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        ...priorityBadgeStyle(q.priority),
+                      }}
+                    >
+                      {q.priority}
+                    </span>
+                    <span
+                      style={{
+                        display: "inline-block",
+                        padding: "3px 10px",
+                        borderRadius: "20px",
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        ...statusBadgeStyle(q.status),
+                      }}
+                    >
+                      {q.status}
+                    </span>
+                    <Text variant="body-default-s" onBackground="neutral-medium">
+                      {q.reply ?? <span style={{ opacity: 0.4 }}>Awaiting reply…</span>}
+                    </Text>
+                    <Text variant="label-default-s" onBackground="neutral-weak">
+                      {new Date(q.createdAt).toLocaleDateString("en-GB", {
+                        day: "2-digit", month: "short", year: "numeric",
+                      })}
+                    </Text>
+                  </div>
+                ))}
+              </Column>
+            </>
+          )}
+        </Column>
+      </RevealFx>
+
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* Bed / Room Availability                                           */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      <RevealFx translateY="12" delay={0.25} fillWidth>
+        <Column
+          fillWidth
+          padding="32"
+          gap="20"
+          style={{
+            background: "var(--surface-background)",
+            border: "1px solid var(--neutral-border-medium)",
+            borderRadius: "20px",
+            position: "relative",
+            overflow: "hidden",
+            cursor: "pointer",
+            transition: "transform 0.2s, box-shadow 0.2s",
+          }}
+          onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => {
+            e.currentTarget.style.transform = "translateY(-2px)";
+            e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.15)";
+          }}
+          onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "none";
+          }}
+          onClick={() => router.push("/dashboard/rooms")}
+        >
+          {/* accent top bar */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: "3px",
+              background: "linear-gradient(90deg, #10b981, #06b6d4)",
+            }}
+          />
+
+          <Row gap="16" vertical="center" paddingTop="4" horizontal="between" fillWidth>
+            <Row gap="16" vertical="center">
+              <div
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "14px",
+                  background: "linear-gradient(135deg, rgba(16,185,129,0.15), rgba(6,182,212,0.15))",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "24px",
+                }}
+              >
+                🛏️
+              </div>
+              <Column gap="4">
+                <Heading variant="heading-strong-l">Bed / Room Availability</Heading>
+                <Text variant="body-default-m" onBackground="neutral-weak">
+                  Monitor live ward counts, patient occupancy percentages, and bed assignments.
+                </Text>
+              </Column>
+            </Row>
+            <Button variant="secondary" size="m">
+              View Rooms &amp; Beds →
+            </Button>
+          </Row>
+        </Column>
+      </RevealFx>
+
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* Quick Actions — UNCHANGED                                         */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      <RevealFx translateY="16" delay={0.3} fillWidth>
+        <Column padding="32" background="surface" border="neutral-alpha-weak" radius="l" gap="24">
+          <Heading variant="heading-strong-l">Quick Actions</Heading>
           <div
             style={{
               display: "grid",
@@ -616,7 +1039,11 @@ export default function HospitalDashboard() {
             ))}
           </Column>
         </Column>
+
       </RevealFx>
+
+      {/* Room Detail Modal removed from dashboard */}
     </Column>
   );
+
 }

@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
 import { useTranslations } from "next-intl";
+
 import {
   Heading,
   Text,
@@ -101,12 +103,16 @@ export default function AdminLogin() {
 
           <RevealFx translateY="4" fillWidth horizontal="center" paddingBottom="8">
             <Heading wrap="balance" variant="display-strong-s">
+
               {t("adminLogin")}
+
             </Heading>
           </RevealFx>
           <RevealFx translateY="8" delay={0.1} fillWidth horizontal="center" paddingBottom="24">
             <Text wrap="balance" onBackground="neutral-weak" variant="body-default-m" align="center">
+
               {t("adminLoginDesc")}
+
             </Text>
           </RevealFx>
 
@@ -131,7 +137,11 @@ export default function AdminLogin() {
               )}
 
               <Column gap="8" fillWidth>
+
                 <Text variant="label-strong-m">{t("emailAddress")}</Text>
+
+
+
                 <input
                   id="admin-email"
                   type="email"
@@ -154,7 +164,10 @@ export default function AdminLogin() {
               </Column>
 
               <Column gap="8" fillWidth>
+
                 <Text variant="label-strong-m">{t("password")}</Text>
+
+
                 <input
                   id="admin-password"
                   type="password"
@@ -182,7 +195,9 @@ export default function AdminLogin() {
                   onBackground="brand-medium"
                   style={{ cursor: "pointer" }}
                 >
+
                   {t("forgotPassword")}
+
                 </Text>
               </Row>
 
@@ -194,6 +209,7 @@ export default function AdminLogin() {
                 weight="strong"
                 fillWidth
               >
+
                 {loading ? t("signingIn") : t("signInCommand")}
               </Button>
             </form>
@@ -210,7 +226,9 @@ export default function AdminLogin() {
               vertical="center"
             >
               <Text variant="body-default-s" onBackground="neutral-weak" align="center" style={{ width: "100%" }}>
-                {t("adminProvisionedNote")}
+
+                🔒{t("adminProvisionedNote")}
+
               </Text>
             </Row>
           </RevealFx>
@@ -218,7 +236,9 @@ export default function AdminLogin() {
           {/* Back to selection */}
           <RevealFx translateY="16" delay={0.4} fillWidth horizontal="center" paddingTop="16">
             <Button variant="tertiary" size="s" href="/login" prefixIcon="arrowLeft">
+
               {t("backToPortal")}
+
             </Button>
           </RevealFx>
         </Column>
