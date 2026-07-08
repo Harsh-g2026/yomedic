@@ -7,7 +7,7 @@ export async function GET() {
         bloodType: 'asc'
       }
     });
-    const mapped = rows.map(r => ({
+    const mapped = rows.map((r: any) => ({
       id: r.id,
       blood_type: r.bloodType,
       quantity_units: r.quantityUnits,
