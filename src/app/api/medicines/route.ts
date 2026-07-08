@@ -10,7 +10,7 @@ export async function GET() {
         name: 'asc'
       }
     })
-    const mapped = rows.map(r => ({
+    const mapped = rows.map((r: any) => ({
       id: r.id,
       name: r.name,
       category: r.category,
