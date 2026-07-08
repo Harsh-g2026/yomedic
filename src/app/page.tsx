@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import {
   Heading,
   Text,
@@ -7,22 +10,12 @@ import {
   Badge,
   Row,
   Schema,
-  Meta,
   Line,
 } from "@once-ui-system/core";
 import { home, person, baseURL } from "@/resources";
 
-export async function generateMetadata() {
-  return Meta.generate({
-    title: home.title,
-    description: home.description,
-    baseURL: baseURL,
-    path: home.path,
-    image: home.image,
-  });
-}
-
 export default function Home() {
+  const t = useTranslations("Landing");
   return (
     <Column maxWidth="l" gap="xl" paddingY="12" horizontal="center" fillWidth>
       <Schema
@@ -63,7 +56,7 @@ export default function Home() {
                   <strong>Yomedic</strong>
                   <Line background="brand-alpha-strong" vert height="16" />
                   <Text onBackground="brand-medium" style={{ fontSize: "12px" }}>
-                    District Health Management
+                    {t("tagline")}
                   </Text>
                 </Row>
               </Badge>
@@ -71,12 +64,12 @@ export default function Home() {
           )}
           <RevealFx translateY="4" fillWidth horizontal="center" paddingBottom="16">
             <Heading wrap="balance" variant="display-strong-l" align="center">
-              {home.headline}
+              {t("headline")}
             </Heading>
           </RevealFx>
           <RevealFx translateY="8" delay={0.2} fillWidth horizontal="center" paddingBottom="32">
             <Text wrap="balance" onBackground="neutral-weak" variant="heading-default-xl" align="center">
-              {home.subline}
+              {t("subline")}
             </Text>
           </RevealFx>
         </Column>
@@ -152,14 +145,14 @@ export default function Home() {
                   paddingX="12"
                   paddingY="4"
                 >
-                  PHC / CHC
+                  {t("hospitalSubtitle")}
                 </Badge>
               </Row>
 
               <Column gap="8">
-                <Heading variant="heading-strong-l">Hospital Management</Heading>
+                <Heading variant="heading-strong-l">{t("hospitalTitle")}</Heading>
                 <Text variant="body-default-m" onBackground="neutral-weak">
-                  Manage your PHC/CHC inventory, patient records, staff attendance, and bed availability. Submit daily reports to the district.
+                  {t("hospitalDescription")}
                 </Text>
               </Column>
 
@@ -167,13 +160,13 @@ export default function Home() {
 
               <Column gap="8">
                 <Row gap="8" vertical="center">
-                  <Text variant="label-default-s" onBackground="neutral-medium">✦ Stock & inventory management</Text>
+                  <Text variant="label-default-s" onBackground="neutral-medium">{t("hospitalBullet1")}</Text>
                 </Row>
                 <Row gap="8" vertical="center">
-                  <Text variant="label-default-s" onBackground="neutral-medium">✦ Patient footfall tracking</Text>
+                  <Text variant="label-default-s" onBackground="neutral-medium">{t("hospitalBullet2")}</Text>
                 </Row>
                 <Row gap="8" vertical="center">
-                  <Text variant="label-default-s" onBackground="neutral-medium">✦ Join district dashboard</Text>
+                  <Text variant="label-default-s" onBackground="neutral-medium">{t("hospitalBullet3")}</Text>
                 </Row>
               </Column>
 
@@ -183,7 +176,7 @@ export default function Home() {
                   size="m"
                   arrowIcon
                 >
-                  Access Portal
+                  {t("accessPortal")}
                 </Button>
               </Row>
             </Column>
@@ -247,14 +240,14 @@ export default function Home() {
                   paddingX="12"
                   paddingY="4"
                 >
-                  DISTRICT
+                  {t("adminSubtitle")}
                 </Badge>
               </Row>
 
               <Column gap="8">
-                <Heading variant="heading-strong-l">District Administrator</Heading>
+                <Heading variant="heading-strong-l">{t("adminTitle")}</Heading>
                 <Text variant="body-default-m" onBackground="neutral-weak">
-                  Monitor all PHCs & CHCs across the district. Review join requests, view AI-driven forecasts, and manage resource redistribution.
+                  {t("adminDescription")}
                 </Text>
               </Column>
 
@@ -262,13 +255,13 @@ export default function Home() {
 
               <Column gap="8">
                 <Row gap="8" vertical="center">
-                  <Text variant="label-default-s" onBackground="neutral-medium">✦ Multi-facility monitoring</Text>
+                  <Text variant="label-default-s" onBackground="neutral-medium">{t("adminBullet1")}</Text>
                 </Row>
                 <Row gap="8" vertical="center">
-                  <Text variant="label-default-s" onBackground="neutral-medium">✦ AI demand forecasts & alerts</Text>
+                  <Text variant="label-default-s" onBackground="neutral-medium">{t("adminBullet2")}</Text>
                 </Row>
                 <Row gap="8" vertical="center">
-                  <Text variant="label-default-s" onBackground="neutral-medium">✦ Resource redistribution</Text>
+                  <Text variant="label-default-s" onBackground="neutral-medium">{t("adminBullet3")}</Text>
                 </Row>
               </Column>
 
@@ -278,7 +271,7 @@ export default function Home() {
                   size="m"
                   arrowIcon
                 >
-                  Access Portal
+                  {t("accessPortal")}
                 </Button>
               </Row>
             </Column>
@@ -289,7 +282,7 @@ export default function Home() {
       {/* Bottom Tagline */}
       <RevealFx translateY="16" delay={0.5} fillWidth horizontal="center">
         <Text variant="body-default-s" onBackground="neutral-weak" align="center" style={{ maxWidth: "480px" }}>
-          Multilingual AI platform powering real-time health centre management across India&apos;s public health infrastructure.
+          {t("taglineBottom")}
         </Text>
       </RevealFx>
     </Column>

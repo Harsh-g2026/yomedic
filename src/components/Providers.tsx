@@ -20,6 +20,10 @@ import {
 import { style, dataStyle } from "../resources";
 import { iconLibrary } from "../resources/icons";
 
+import { I18nProvider } from "./I18nProvider";
+
+
+
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <LayoutProvider>
@@ -48,7 +52,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
           }}
         >
           <ToastProvider>
-            <IconProvider icons={iconLibrary}>{children}</IconProvider>
+
+            <I18nProvider>
+              <IconProvider icons={iconLibrary}>{children}</IconProvider>
+            </I18nProvider>
+
           </ToastProvider>
         </DataThemeProvider>
       </ThemeProvider>

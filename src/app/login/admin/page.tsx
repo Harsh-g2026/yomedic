@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
+import { useTranslations } from "next-intl";
+
 import {
   Heading,
   Text,
@@ -15,6 +18,7 @@ import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 
 export default function AdminLogin() {
+  const t = useTranslations("PortalLogin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -37,7 +41,7 @@ export default function AdminLogin() {
       if (role !== "admin") {
         // Role mismatch — sign out immediately and block routing
         await signOut(auth);
-        setError("Please use the Hospital Management portal to log in.");
+        setError(t("hospitalRoleMismatch"));
         return;
       }
 
@@ -99,12 +103,16 @@ export default function AdminLogin() {
 
           <RevealFx translateY="4" fillWidth horizontal="center" paddingBottom="8">
             <Heading wrap="balance" variant="display-strong-s">
-              Administrator Login
+
+              {t("adminLogin")}
+
             </Heading>
           </RevealFx>
           <RevealFx translateY="8" delay={0.1} fillWidth horizontal="center" paddingBottom="24">
             <Text wrap="balance" onBackground="neutral-weak" variant="body-default-m" align="center">
-              Access the District Command Center to monitor all PHCs &amp; CHCs, review requests, and manage resources.
+
+              {t("adminLoginDesc")}
+
             </Text>
           </RevealFx>
 
@@ -129,7 +137,11 @@ export default function AdminLogin() {
               )}
 
               <Column gap="8" fillWidth>
-                <Text variant="label-strong-m">Email Address</Text>
+
+                <Text variant="label-strong-m">{t("emailAddress")}</Text>
+
+
+
                 <input
                   id="admin-email"
                   type="email"
@@ -152,7 +164,10 @@ export default function AdminLogin() {
               </Column>
 
               <Column gap="8" fillWidth>
-                <Text variant="label-strong-m">Password</Text>
+
+                <Text variant="label-strong-m">{t("password")}</Text>
+
+
                 <input
                   id="admin-password"
                   type="password"
@@ -180,7 +195,9 @@ export default function AdminLogin() {
                   onBackground="brand-medium"
                   style={{ cursor: "pointer" }}
                 >
-                  Forgot Password?
+
+                  {t("forgotPassword")}
+
                 </Text>
               </Row>
 
@@ -192,7 +209,8 @@ export default function AdminLogin() {
                 weight="strong"
                 fillWidth
               >
-                {loading ? "Signing in..." : "Sign In to Command Center"}
+
+                {loading ? t("signingIn") : t("signInCommand")}
               </Button>
             </form>
           </RevealFx>
@@ -208,7 +226,9 @@ export default function AdminLogin() {
               vertical="center"
             >
               <Text variant="body-default-s" onBackground="neutral-weak" align="center" style={{ width: "100%" }}>
-                🔒 Administrator accounts are provisioned by the district health office. Contact your DHS for access.
+
+                🔒{t("adminProvisionedNote")}
+
               </Text>
             </Row>
           </RevealFx>
@@ -216,7 +236,9 @@ export default function AdminLogin() {
           {/* Back to selection */}
           <RevealFx translateY="16" delay={0.4} fillWidth horizontal="center" paddingTop="16">
             <Button variant="tertiary" size="s" href="/login" prefixIcon="arrowLeft">
-              Back to Portal Selection
+
+              {t("backToPortal")}
+
             </Button>
           </RevealFx>
         </Column>

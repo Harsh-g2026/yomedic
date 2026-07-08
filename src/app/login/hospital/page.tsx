@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   Heading,
   Text,
@@ -17,6 +18,7 @@ import { doc, getDoc } from "firebase/firestore";
 import RequestAccessModal from "@/components/RequestAccessModal";
 
 export default function HospitalLogin() {
+  const t = useTranslations("PortalLogin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -40,7 +42,9 @@ export default function HospitalLogin() {
       if (role !== "staff") {
         // Role mismatch — sign out immediately and block routing
         await signOut(auth);
-        setError("Please use the District Administrator portal to log in.");
+
+        setError(t("adminRoleMismatch"));
+
         return;
       }
 
@@ -102,12 +106,16 @@ export default function HospitalLogin() {
 
           <RevealFx translateY="4" fillWidth horizontal="center" paddingBottom="8">
             <Heading wrap="balance" variant="display-strong-s">
-              Hospital Login
+
+              {t("hospitalLogin")}
+
             </Heading>
           </RevealFx>
           <RevealFx translateY="8" delay={0.1} fillWidth horizontal="center" paddingBottom="24">
             <Text wrap="balance" onBackground="neutral-weak" variant="body-default-m" align="center">
-              Access your PHC/CHC management dashboard to track stocks, patients, and resources.
+
+              {t("hospitalLoginDesc")}
+
             </Text>
           </RevealFx>
 
@@ -132,7 +140,10 @@ export default function HospitalLogin() {
               )}
 
               <Column gap="8" fillWidth>
-                <Text variant="label-strong-m">Email Address</Text>
+
+                <Text variant="label-strong-m">{t("emailAddress")}</Text>
+
+
                 <input
                   id="hospital-email"
                   type="email"
@@ -155,7 +166,10 @@ export default function HospitalLogin() {
               </Column>
 
               <Column gap="8" fillWidth>
-                <Text variant="label-strong-m">Password</Text>
+
+                <Text variant="label-strong-m">{t("password")}</Text>
+
+
                 <input
                   id="hospital-password"
                   type="password"
@@ -183,7 +197,9 @@ export default function HospitalLogin() {
                   onBackground="brand-medium"
                   style={{ cursor: "pointer" }}
                 >
-                  Forgot Password?
+
+                  {t("forgotPassword")}
+
                 </Text>
               </Row>
 
@@ -195,7 +211,9 @@ export default function HospitalLogin() {
                 weight="strong"
                 fillWidth
               >
-                {loading ? "Signing in..." : "Sign In to Dashboard"}
+
+                {loading ? t("signingIn") : t("signInDashboard")}
+
               </Button>
             </form>
           </RevealFx>
@@ -210,7 +228,9 @@ export default function HospitalLogin() {
                   onBackground="neutral-medium"
                   style={{ whiteSpace: "nowrap", flexShrink: 0 }}
                 >
-                  New facility?
+
+                  {t("newFacility")}
+
                 </Text>
                 <Line background="neutral-alpha-medium" />
               </Row>
@@ -222,7 +242,9 @@ export default function HospitalLogin() {
                 fillWidth
                 onClick={() => setShowAccessModal(true)}
               >
-                Request Platform Access
+
+                {t("requestAccess")}
+
               </Button>
 
               <Text
@@ -231,7 +253,9 @@ export default function HospitalLogin() {
                 align="center"
                 style={{ maxWidth: "320px" }}
               >
-                Submit your PHC/CHC establishment documents for verification to gain dashboard access.
+
+                {t("requestAccessDesc")}
+
               </Text>
             </Column>
           </RevealFx>
@@ -239,7 +263,9 @@ export default function HospitalLogin() {
           {/* Back to selection */}
           <RevealFx translateY="16" delay={0.4} fillWidth horizontal="center" paddingTop="16">
             <Button variant="tertiary" size="s" href="/login" prefixIcon="arrowLeft">
-              Back to Portal Selection
+
+              {t("backToPortal")}
+
             </Button>
           </RevealFx>
         </Column>

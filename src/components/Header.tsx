@@ -3,11 +3,17 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+
 import { Fade, Flex, Line, Row, ToggleButton } from "@once-ui-system/core";
 
 import { routes, display, person } from "@/resources";
 import { ThemeToggle } from "./ThemeToggle";
+import { LanguageToggle } from "./LanguageToggle";
 import styles from "./Header.module.scss";
+
+
 
 type TimeDisplayProps = {
   timeZone: string;
@@ -45,6 +51,15 @@ export default TimeDisplay;
 export const Header = () => {
   const pathname = usePathname() ?? "";
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setIsLoggedIn(!!currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
   return (
     <>
       <Fade s={{ hide: true }} fillWidth position="fixed" height="80" zIndex={9} />
@@ -72,6 +87,7 @@ export const Header = () => {
           position: "fixed",
         }}
       >
+
         <Row paddingLeft="12" fillWidth vertical="center" textVariant="body-default-s">
           {display.location && <Row s={{ hide: true }}>{person.location}</Row>}
         </Row>
@@ -86,33 +102,18 @@ export const Header = () => {
             zIndex={1}
           >
             <Row gap="4" vertical="center" textVariant="body-default-s" suppressHydrationWarning>
-              {routes["/"] && (
+              {!isLoggedIn && routes["/"] && (
                 <ToggleButton prefixIcon="home" href="/" selected={pathname === "/"} />
               )}
-              {routes["/login"] && (
+              {!isLoggedIn && routes["/login"] && (
                 <>
                   <Line background="neutral-alpha-medium" vert maxHeight="24" />
-                  <Row s={{ hide: true }}>
-                    <ToggleButton
-                      prefixIcon="person"
-                      href="/login"
-                      label="Login"
-                      selected={pathname === "/login"}
-                    />
-                  </Row>
-                  <Row hide s={{ hide: false }}>
-                    <ToggleButton
-                      prefixIcon="person"
-                      href="/login"
-                      selected={pathname === "/login"}
-                    />
-                  </Row>
-                </>
-              )}
-              {display.themeSwitcher && (
-                <>
-                  <Line background="neutral-alpha-medium" vert maxHeight="24" />
-                  <ThemeToggle />
+                  <ToggleButton
+                    prefixIcon="person"
+                    href="/login"
+                    label="Login"
+                    selected={pathname === "/login"}
+                  />
                 </>
               )}
             </Row>
@@ -126,12 +127,13 @@ export const Header = () => {
             textVariant="body-default-s"
             gap="20"
           >
-            <Flex s={{ hide: true }}>
-              {display.time && <TimeDisplay timeZone="UTC" />}
-            </Flex>
+            {display.time && <TimeDisplay timeZone="UTC" />}
+            {display.themeSwitcher && <ThemeToggle />}
+            <LanguageToggle />
           </Flex>
         </Flex>
       </Row>
     </>
+
   );
 };

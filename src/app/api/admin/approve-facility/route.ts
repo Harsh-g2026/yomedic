@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const decodedToken = await adminAuth.verifyIdToken(authHeader);
-    
+
     // We assume the verified admin token implies access. You could further verify decodedToken.email
     // if there's a strict whitelist of admin accounts (e.g. admin@123.com).
 
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
 
     } catch (firebaseError) {
       console.error('Firebase Error - Initiating Rollback:', firebaseError);
-      
+
       // 🛑 ROLLBACK: Delete Firebase user if it was created but Firestore failed
       if (createdUserRecord) {
         await adminAuth.deleteUser(createdUserRecord.uid).catch(console.error);
@@ -84,14 +84,16 @@ export async function POST(req: Request) {
         .from('access_requests')
         .update({ status: 'pending' })
         .eq('id', docId);
-        
+
       return NextResponse.json({ error: 'Failed to provision facility account. Operations rolled back.' }, { status: 500 });
     }
 
     // STEP 4: Automated Email Notification
     try {
       if (process.env.RESEND_API_KEY) {
+
         const resend = new Resend(process.env.RESEND_API_KEY);
+
         await resend.emails.send({
           from: 'Yomedic Admin <no-reply@yomedic.com>', // Ensure domain is verified in Resend
           to: contactEmail,
@@ -121,8 +123,8 @@ export async function POST(req: Request) {
     }
 
     // --- ✅ WORKFLOW SUCCESS ---
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: 'Facility approved and account provisioned successfully.'
     });
 

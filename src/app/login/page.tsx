@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   Heading,
   Text,
@@ -12,18 +13,19 @@ import {
 } from "@once-ui-system/core";
 
 export default function LoginSelector() {
+  const t = useTranslations("Login");
   return (
     <Column maxWidth="l" gap="xl" paddingY="12" horizontal="center" fillWidth>
       <Column fillWidth horizontal="center" gap="m">
         <Column maxWidth="m" horizontal="center" align="center">
           <RevealFx translateY="4" fillWidth horizontal="center" paddingBottom="8">
             <Heading wrap="balance" variant="display-strong-s" align="center">
-              Choose Your Portal
+              {t("title")}
             </Heading>
           </RevealFx>
           <RevealFx translateY="8" delay={0.1} fillWidth horizontal="center" paddingBottom="32">
             <Text wrap="balance" onBackground="neutral-weak" variant="body-default-l" align="center">
-              Select the appropriate login portal to access the Yomedic platform.
+              {t("subtitle")}
             </Text>
           </RevealFx>
         </Column>
@@ -80,12 +82,12 @@ export default function LoginSelector() {
                 🏥
               </div>
               <Column gap="2">
-                <Heading variant="heading-strong-m">Hospital Login</Heading>
-                <Text variant="label-default-s" onBackground="neutral-medium">PHC / CHC Staff</Text>
+                <Heading variant="heading-strong-m">{t("hospitalTitle")}</Heading>
+                <Text variant="label-default-s" onBackground="neutral-medium">{t("hospitalSubtitle")}</Text>
               </Column>
             </Row>
             <Text variant="body-default-s" onBackground="neutral-weak">
-              Access your facility&apos;s management dashboard to track stocks, patients, beds, and staff.
+              {t("hospitalDescription")}
             </Text>
             <Button
               id="login-hospital-btn"
@@ -95,7 +97,7 @@ export default function LoginSelector() {
               arrowIcon
               href="/login/hospital"
             >
-              Hospital Sign In
+              {t("hospitalSignIn")}
             </Button>
           </Column>
 
@@ -138,12 +140,12 @@ export default function LoginSelector() {
                 🏛️
               </div>
               <Column gap="2">
-                <Heading variant="heading-strong-m">Administrator Login</Heading>
-                <Text variant="label-default-s" onBackground="neutral-medium">District Officials</Text>
+                <Heading variant="heading-strong-m">{t("adminTitle")}</Heading>
+                <Text variant="label-default-s" onBackground="neutral-medium">{t("adminSubtitle")}</Text>
               </Column>
             </Row>
             <Text variant="body-default-s" onBackground="neutral-weak">
-              Monitor all health centres across the district, review join requests, and manage resources.
+              {t("adminDescription")}
             </Text>
             <Button
               id="login-admin-btn"
@@ -153,7 +155,7 @@ export default function LoginSelector() {
               arrowIcon
               href="/login/admin"
             >
-              Admin Sign In
+              {t("adminSignIn")}
             </Button>
           </Column>
         </div>
@@ -162,7 +164,7 @@ export default function LoginSelector() {
       {/* Back Link */}
       <RevealFx translateY="16" delay={0.3} fillWidth horizontal="center">
         <Button variant="tertiary" size="s" href="/" prefixIcon="arrowLeft">
-          Back to Home
+          {t("backToHome")}
         </Button>
       </RevealFx>
     </Column>

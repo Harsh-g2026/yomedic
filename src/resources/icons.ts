@@ -31,7 +31,22 @@ import {
   SiSupabase,
 } from "react-icons/si";
 
-import { FaDiscord, FaGithub, FaLinkedin, FaX, FaThreads, FaInstagram, FaXTwitter, FaFacebook, FaPinterest, FaWhatsapp, FaReddit, FaTelegram, } from "react-icons/fa6";
+import {
+  FaDiscord,
+  FaGithub,
+  FaLinkedin,
+  FaX,
+  FaThreads,
+  FaInstagram,
+  FaXTwitter,
+  FaFacebook,
+  FaPinterest,
+  FaWhatsapp,
+  FaReddit,
+  FaTelegram,
+  FaDroplet,
+  FaPills,
+} from "react-icons/fa6";
 
 export const iconLibrary: Record<string, IconType> = {
   arrowUpRight: HiArrowUpRight,
@@ -41,23 +56,23 @@ export const iconLibrary: Record<string, IconType> = {
   globe: HiOutlineGlobeAsiaAustralia,
   person: PiUserCircleDuotone,
   grid: PiGridFourDuotone,
-  book: PiBookBookmarkDuotone,
-  openLink: HiOutlineLink,
+  bookmark: PiBookBookmarkDuotone,
+  chainLink: HiOutlineLink,
   calendar: HiCalendarDays,
   home: PiHouseDuotone,
   gallery: PiImageDuotone,
+  document: HiOutlineDocument,
+  rocket: HiOutlineRocketLaunch,
   edit: HiOutlinePencilSquare,
-  discord: FaDiscord,
   eye: HiOutlineEye,
   eyeOff: HiOutlineEyeSlash,
+  arrowUpRightFromSquare: HiArrowTopRightOnSquare,
+  discord: FaDiscord,
   github: FaGithub,
   linkedin: FaLinkedin,
   x: FaX,
-  twitter: FaXTwitter,
+  xTwitter: FaXTwitter,
   threads: FaThreads,
-  arrowUpRightFromSquare: HiArrowTopRightOnSquare,
-  document: HiOutlineDocument,
-  rocket: HiOutlineRocketLaunch,
   javascript: SiJavascript,
   nextjs: SiNextdotjs,
   supabase: SiSupabase,
@@ -68,6 +83,8 @@ export const iconLibrary: Record<string, IconType> = {
   reddit: FaReddit,
   telegram: FaTelegram,
   instagram: FaInstagram,
+  blood: FaDroplet,
+  pills: FaPills,
 };
 
 export type IconLibrary = typeof iconLibrary;

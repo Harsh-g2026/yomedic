@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { useTranslations } from "next-intl";
 import {
   Column,
   Row,
@@ -33,19 +34,19 @@ interface DbQuery {
 // ── Helpers ────────────────────────────────────────────────────────────────────
 function statusBadgeStyle(status: string) {
   switch (status) {
-    case "Pending":     return { background: "#f59e0b", color: "#000" };
+    case "Pending": return { background: "#f59e0b", color: "#000" };
     case "In Progress": return { background: "#3b82f6", color: "#fff" };
-    case "Resolved":    return { background: "#10b981", color: "#fff" };
-    default:            return { background: "rgba(255,255,255,0.1)", color: "#fff" };
+    case "Resolved": return { background: "#10b981", color: "#fff" };
+    default: return { background: "rgba(255,255,255,0.1)", color: "#fff" };
   }
 }
 
 function priorityBadgeStyle(priority: string) {
   switch (priority) {
     case "Emergency": return { background: "#ef4444", color: "#fff" };
-    case "High":      return { background: "#f97316", color: "#fff" };
-    case "Medium":    return { background: "#f59e0b", color: "#000" };
-    default:          return { background: "#6b7280", color: "#fff" };
+    case "High": return { background: "#f97316", color: "#fff" };
+    case "Medium": return { background: "#f59e0b", color: "#000" };
+    default: return { background: "#6b7280", color: "#fff" };
   }
 }
 
@@ -213,6 +214,7 @@ function ViewModal({ query, onClose }: { query: DbQuery; onClose: () => void }) 
 // ── Main Component ────────────────────────────────────────────────────────────
 // ══════════════════════════════════════════════════════════════════════════════
 export default function Dashboard() {
+  const t = useTranslations("DistrictDashboard");
   const [loadingAuth, setLoadingAuth] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [queries, setQueries] = useState<DbQuery[]>([]);
@@ -228,11 +230,16 @@ export default function Dashboard() {
         setUser(currentUser);
         setLoadingAuth(false);
       } else {
+
+        // Redirect to login if not authenticated
         router.push("/login");
       }
     });
+
     return () => unsubscribe();
   }, [router]);
+
+
 
   // ── Load all hospital queries ──────────────────────────────────────────────
   const loadQueries = useCallback(async () => {
@@ -252,10 +259,13 @@ export default function Dashboard() {
     if (!loadingAuth && user) loadQueries();
   }, [loadingAuth, user, loadQueries]);
 
+
   const handleSignOut = async () => {
     await signOut(auth);
     router.push("/login");
   };
+
+
 
   // ── Resolve ────────────────────────────────────────────────────────────────
   const handleResolve = async (q: DbQuery) => {
@@ -281,10 +291,13 @@ export default function Dashboard() {
   if (loadingAuth) {
     return (
       <Column fillWidth style={{ minHeight: "100vh" }} vertical="center" horizontal="center">
+
         <Text variant="heading-default-l" onBackground="neutral-weak">Authenticating...</Text>
       </Column>
     );
   }
+
+
 
   const pendingCount = queries.filter((q) => q.status === "Pending").length;
 
@@ -295,17 +308,22 @@ export default function Dashboard() {
       <RevealFx translateY="4" fillWidth>
         <Row horizontal="between" vertical="center" fillWidth paddingBottom="16">
           <Column gap="8">
-            <Heading variant="display-strong-s">District Command Center</Heading>
+
+            <Heading variant="display-strong-s">{t("title")}</Heading>
             <Text variant="body-default-m" onBackground="neutral-weak">
-              Real-time monitoring across all PHCs &amp; CHCs
+              {t("subtitle")}
+
+
+
             </Text>
           </Column>
           <Row gap="16" vertical="center">
             <Text variant="label-default-s" onBackground="neutral-medium">
-              Logged in as: {user?.email}
+
+              {t("loggedInAs")} {user?.email}
             </Text>
             <Button variant="secondary" size="s" onClick={handleSignOut}>
-              Sign Out
+              {t("signOut")}
             </Button>
           </Row>
         </Row>
@@ -314,255 +332,275 @@ export default function Dashboard() {
 
       {/* Critical Alerts Banner */}
       <RevealFx translateY="8" delay={0.1} fillWidth>
+
         <Row
-          fillWidth padding="16"
-          background="danger-alpha-weak" border="danger-alpha-medium"
-          radius="m" vertical="center" horizontal="between"
+          fillWidth
+          padding="16"
+          background="danger-alpha-weak"
+          border="danger-alpha-medium"
+          radius="m"
+          vertical="center"
+          horizontal="between"
         >
           <Row gap="12" vertical="center">
-            <Badge background="danger-medium" textVariant="label-strong-s">CRITICAL ALERT</Badge>
+            <Badge background="danger-medium" textVariant="label-strong-s">{t("criticalAlert")}</Badge>
             <Text variant="body-strong-m" onBackground="danger-strong">
-              High risk of Paracetamol stock-out at CHC North within 24 hours.
+              {t("alertText")}
             </Text>
           </Row>
-          <Button variant="primary" size="s" weight="strong">Redistribute Stock</Button>
+          <Button variant="primary" size="s" weight="strong">{t("redistributeStock")}</Button>
+
+
         </Row>
       </RevealFx>
 
       {/* Metrics Grid */}
       <RevealFx translateY="12" delay={0.2} fillWidth>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px", width: "100%" }}>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', width: '100%' }}>
 
           {/* Stock Monitoring */}
           <Column padding="24" background="surface" border="neutral-alpha-weak" radius="l" gap="16">
             <Row horizontal="between" vertical="center">
-              <Text variant="heading-strong-m">Stock Levels</Text>
-              <Badge background="warning-medium" textVariant="label-strong-s">ATTENTION</Badge>
+              <Text variant="heading-strong-m">{t("stockLevels")}</Text>
+              <Badge background="warning-medium" textVariant="label-strong-s">{t("stockAttention")}</Badge>
             </Row>
             <Column gap="8">
               <Text variant="display-strong-m" onBackground="warning-strong">68%</Text>
-              <Text variant="body-default-s" onBackground="neutral-weak">Average essential medicine availability</Text>
+              <Text variant="body-default-s" onBackground="neutral-weak">{t("stockDesc")}</Text>
             </Column>
             <Line background="neutral-alpha-weak" />
-            <Text variant="label-default-s" onBackground="brand-medium" style={{ cursor: "pointer" }}>View AI Forecasts →</Text>
+            <Text variant="label-default-s" onBackground="brand-medium" style={{ cursor: "pointer" }}>{t("viewForecasts")}</Text>
+
           </Column>
 
           {/* Patient Footfall */}
           <Column padding="24" background="surface" border="neutral-alpha-weak" radius="l" gap="16">
             <Row horizontal="between" vertical="center">
-              <Text variant="heading-strong-m">Patient Footfall</Text>
-              <Badge background="success-medium" textVariant="label-strong-s">LIVE</Badge>
+
+              <Text variant="heading-strong-m">{t("patientFootfall")}</Text>
+              <Badge background="success-medium" textVariant="label-strong-s">{t("live")}</Badge>
             </Row>
             <Column gap="8">
               <Text variant="display-strong-m" onBackground="success-strong">1,248</Text>
-              <Text variant="body-default-s" onBackground="neutral-weak">Total patients processed today</Text>
+              <Text variant="body-default-s" onBackground="neutral-weak">{t("patientsDesc")}</Text>
             </Column>
             <Line background="neutral-alpha-weak" />
-            <Text variant="label-default-s" onBackground="brand-medium" style={{ cursor: "pointer" }}>View Trend Analysis →</Text>
+            <Text variant="label-default-s" onBackground="brand-medium" style={{ cursor: "pointer" }}>{t("viewTrends")}</Text>
+
           </Column>
 
           {/* Bed Availability */}
           <Column padding="24" background="surface" border="neutral-alpha-weak" radius="l" gap="16">
             <Row horizontal="between" vertical="center">
-              <Text variant="heading-strong-m">Bed Capacity</Text>
-              <Badge background="danger-medium" textVariant="label-strong-s">CRITICAL</Badge>
+
+              <Text variant="heading-strong-m">{t("bedCapacity")}</Text>
+              <Badge background="danger-medium" textVariant="label-strong-s">{t("critical")}</Badge>
             </Row>
             <Column gap="8">
               <Text variant="display-strong-m" onBackground="danger-strong">12 / 150</Text>
-              <Text variant="body-default-s" onBackground="neutral-weak">Available beds across district</Text>
+              <Text variant="body-default-s" onBackground="neutral-weak">{t("bedsDesc")}</Text>
             </Column>
             <Line background="neutral-alpha-weak" />
-            <Text variant="label-default-s" onBackground="brand-medium" style={{ cursor: "pointer" }}>Manage Transfers →</Text>
+            <Text variant="label-default-s" onBackground="brand-medium" style={{ cursor: "pointer" }}>{t("manageTransfers")}</Text>
+
           </Column>
 
           {/* Doctor Attendance */}
           <Column padding="24" background="surface" border="neutral-alpha-weak" radius="l" gap="16">
             <Row horizontal="between" vertical="center">
-              <Text variant="heading-strong-m">Staffing</Text>
-              <Badge background="brand-medium" textVariant="label-strong-s">STABLE</Badge>
+
+              <Text variant="heading-strong-m">{t("staffing")}</Text>
+              <Badge background="brand-medium" textVariant="label-strong-s">{t("stable")}</Badge>
             </Row>
             <Column gap="8">
               <Text variant="display-strong-m" onBackground="brand-strong">85%</Text>
-              <Text variant="body-default-s" onBackground="neutral-weak">Doctor &amp; specialist attendance</Text>
+              <Text variant="body-default-s" onBackground="neutral-weak">{t("staffingDesc")}</Text>
             </Column>
             <Line background="neutral-alpha-weak" />
-            <Text variant="label-default-s" onBackground="brand-medium" style={{ cursor: "pointer" }}>View Roster →</Text>
+            <Text variant="label-default-s" onBackground="brand-medium" style={{ cursor: "pointer" }}>{t("viewRoster")}</Text>
+
           </Column>
 
         </div>
       </RevealFx>
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* Hospital Queries Panel                                             */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      <RevealFx translateY="12" delay={0.25} fillWidth>
-        <Column
-          fillWidth padding="32" gap="20"
-          style={{
-            background: "var(--surface-background)",
-            border: "1px solid var(--neutral-border-medium)",
-            borderRadius: "20px",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          {/* accent bar */}
-          <div
-            style={{
-              position: "absolute", top: 0, left: 0, right: 0, height: "3px",
-              background: "linear-gradient(90deg, #6366f1, #8b5cf6)",
-            }}
-          />
-
-          <Row horizontal="between" vertical="center" fillWidth paddingTop="4">
-            <Row gap="12" vertical="center">
-              <div
-                style={{
-                  width: "42px", height: "42px", borderRadius: "12px",
-                  background: "linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15))",
-                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px",
-                }}
-              >
-                📬
-              </div>
-              <Column gap="2">
-                <Heading variant="heading-strong-l">Hospital Queries</Heading>
-                <Text variant="body-default-s" onBackground="neutral-weak">
-                  Queries submitted by connected hospitals — review, reply and resolve.
-                </Text>
-              </Column>
-            </Row>
-            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-              {pendingCount > 0 && (
-                <span
-                  style={{
-                    background: "#f59e0b", color: "#000",
-                    borderRadius: "20px", padding: "4px 12px",
-                    fontSize: "12px", fontWeight: 700,
-                  }}
-                >
-                  {pendingCount} Pending
-                </span>
-              )}
-              <Button variant="secondary" size="s" onClick={loadQueries}>↻ Refresh</Button>
-            </div>
-          </Row>
-
-          {loadingQueries ? (
-            <Text variant="body-default-m" onBackground="neutral-weak">Loading queries…</Text>
-          ) : queries.length === 0 ? (
-            <Text variant="body-default-m" onBackground="neutral-weak">
-              No queries submitted by hospitals yet.
-            </Text>
-          ) : (
-            <>
-              {/* Table header */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1.8fr 1.6fr 1fr 1fr 1fr 1fr",
-                  gap: "8px",
-                  padding: "10px 16px",
-                  borderRadius: "12px",
-                  background: "rgba(255,255,255,0.04)",
-                }}
-              >
-                {["Hospital", "Subject", "Priority", "Status", "Date", "Actions"].map((h) => (
-                  <Text key={h} variant="label-strong-s" onBackground="neutral-weak">{h}</Text>
-                ))}
-              </div>
-
-              {/* Rows */}
-              <Column gap="8">
-                {queries.map((q) => (
-                  <div
-                    key={q.id}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1.8fr 1.6fr 1fr 1fr 1fr 1fr",
-                      gap: "8px",
-                      alignItems: "center",
-                      padding: "14px 16px",
-                      borderRadius: "12px",
-                      background: "rgba(255,255,255,0.02)",
-                      border: "1px solid rgba(255,255,255,0.04)",
-                    }}
-                  >
-                    <Text variant="body-default-s" onBackground="neutral-strong">
-                      {q.hospitalName}
-                    </Text>
-                    <Text variant="body-default-s" onBackground="neutral-medium">
-                      {q.subject}
-                    </Text>
-                    <span
-                      style={{
-                        display: "inline-block",
-                        padding: "3px 10px",
-                        borderRadius: "20px",
-                        fontSize: "11px",
-                        fontWeight: 700,
-                        ...priorityBadgeStyle(q.priority),
-                      }}
-                    >
-                      {q.priority}
-                    </span>
-                    <span
-                      style={{
-                        display: "inline-block",
-                        padding: "3px 10px",
-                        borderRadius: "20px",
-                        fontSize: "11px",
-                        fontWeight: 700,
-                        ...statusBadgeStyle(q.status),
-                      }}
-                    >
-                      {q.status}
-                    </span>
-                    <Text variant="label-default-s" onBackground="neutral-weak">
-                      {fmt(q.createdAt)}
-                    </Text>
-                    <div style={{ display: "flex", gap: "6px" }}>
-                      <Button variant="secondary" size="s" onClick={() => setViewQuery(q)}>View</Button>
-                      {q.status !== "Resolved" && (
-                        <>
-                          <Button variant="secondary" size="s" onClick={() => setReplyQuery(q)}>Reply</Button>
-                          <Button variant="primary" size="s" onClick={() => handleResolve(q)}>Resolve</Button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </Column>
-            </>
-          )}
-        </Column>
-      </RevealFx>
 
       {/* AI Recommendations Section */}
       <RevealFx translateY="16" delay={0.3} fillWidth>
         <Column padding="32" background="surface" border="neutral-alpha-weak" radius="l" gap="24">
-          <Heading variant="heading-strong-l">AI Redistribution Recommendations</Heading>
+          <Heading variant="heading-strong-l">{t("aiRecommendations")}</Heading>
           <Text variant="body-default-m" onBackground="neutral-weak">
-            Based on current test availability audits and predicted demand, the following re-allocations are suggested:
+            {t("aiRecommendationDesc")}
           </Text>
+
           <Column gap="16">
             <Row fillWidth padding="16" background="brand-alpha-weak" radius="m" vertical="center" horizontal="between">
               <Column gap="4">
-                <Text variant="body-strong-m">Transfer 500x Dengue Rapid Test Kits</Text>
-                <Text variant="label-default-s" onBackground="neutral-medium">From: PHC East (Surplus) → To: CHC South (High Predicted Demand)</Text>
+                <Text variant="body-strong-m">{t("transferDengue")}</Text>
+                <Text variant="label-default-s" onBackground="neutral-medium">{t("transferDengueDesc")}</Text>
               </Column>
-              <Button variant="primary" size="s">Approve Transfer</Button>
+              <Button variant="primary" size="s">{t("approveTransfer")}</Button>
             </Row>
+
             <Row fillWidth padding="16" background="brand-alpha-weak" radius="m" vertical="center" horizontal="between">
               <Column gap="4">
-                <Text variant="body-strong-m">Re-route 3 Incoming Ambulances</Text>
-                <Text variant="label-default-s" onBackground="neutral-medium">From: CHC Central (0 beds) → To: CHC West (15 beds)</Text>
+                <Text variant="body-strong-m">{t("rerouteAmbulances")}</Text>
+                <Text variant="label-default-s" onBackground="neutral-medium">{t("rerouteAmbulancesDesc")}</Text>
               </Column>
-              <Button variant="primary" size="s">Execute Reroute</Button>
+              <Button variant="primary" size="s">{t("executeReroute")}</Button>
+
+              {/* ═══════════════════════════════════════════════════════════════════ */}
+              {/* Hospital Queries Panel                                             */}
+              {/* ═══════════════════════════════════════════════════════════════════ */}
+              <RevealFx translateY="12" delay={0.25} fillWidth>
+                <Column
+                  fillWidth padding="32" gap="20"
+                  style={{
+                    background: "var(--surface-background)",
+                    border: "1px solid var(--neutral-border-medium)",
+                    borderRadius: "20px",
+                    position: "relative",
+                    overflow: "hidden",
+                  }}
+                >
+                  {/* accent bar */}
+                  <div
+                    style={{
+                      position: "absolute", top: 0, left: 0, right: 0, height: "3px",
+                      background: "linear-gradient(90deg, #6366f1, #8b5cf6)",
+                    }}
+                  />
+
+                  <Row horizontal="between" vertical="center" fillWidth paddingTop="4">
+                    <Row gap="12" vertical="center">
+                      <div
+                        style={{
+                          width: "42px", height: "42px", borderRadius: "12px",
+                          background: "linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15))",
+                          display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px",
+                        }}
+                      >
+                        📬
+                      </div>
+                      <Column gap="2">
+                        <Heading variant="heading-strong-l">Hospital Queries</Heading>
+                        <Text variant="body-default-s" onBackground="neutral-weak">
+                          Queries submitted by connected hospitals — review, reply and resolve.
+                        </Text>
+                      </Column>
+                    </Row>
+                    <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                      {pendingCount > 0 && (
+                        <span
+                          style={{
+                            background: "#f59e0b", color: "#000",
+                            borderRadius: "20px", padding: "4px 12px",
+                            fontSize: "12px", fontWeight: 700,
+                          }}
+                        >
+                          {pendingCount} Pending
+                        </span>
+                      )}
+                      <Button variant="secondary" size="s" onClick={loadQueries}>↻ Refresh</Button>
+                    </div>
+                  </Row>
+
+                  {loadingQueries ? (
+                    <Text variant="body-default-m" onBackground="neutral-weak">Loading queries…</Text>
+                  ) : queries.length === 0 ? (
+                    <Text variant="body-default-m" onBackground="neutral-weak">
+                      No queries submitted by hospitals yet.
+                    </Text>
+                  ) : (
+                    <>
+                      {/* Table header */}
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "1.8fr 1.6fr 1fr 1fr 1fr 1fr",
+                          gap: "8px",
+                          padding: "10px 16px",
+                          borderRadius: "12px",
+                          background: "rgba(255,255,255,0.04)",
+                        }}
+                      >
+                        {["Hospital", "Subject", "Priority", "Status", "Date", "Actions"].map((h) => (
+                          <Text key={h} variant="label-strong-s" onBackground="neutral-weak">{h}</Text>
+                        ))}
+                      </div>
+
+                      {/* Rows */}
+                      <Column gap="8">
+                        {queries.map((q) => (
+                          <div
+                            key={q.id}
+                            style={{
+                              display: "grid",
+                              gridTemplateColumns: "1.8fr 1.6fr 1fr 1fr 1fr 1fr",
+                              gap: "8px",
+                              alignItems: "center",
+                              padding: "14px 16px",
+                              borderRadius: "12px",
+                              background: "rgba(255,255,255,0.02)",
+                              border: "1px solid rgba(255,255,255,0.04)",
+                            }}
+                          >
+                            <Text variant="body-default-s" onBackground="neutral-strong">
+                              {q.hospitalName}
+                            </Text>
+                            <Text variant="body-default-s" onBackground="neutral-medium">
+                              {q.subject}
+                            </Text>
+                            <span
+                              style={{
+                                display: "inline-block",
+                                padding: "3px 10px",
+                                borderRadius: "20px",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                ...priorityBadgeStyle(q.priority),
+                              }}
+                            >
+                              {q.priority}
+                            </span>
+                            <span
+                              style={{
+                                display: "inline-block",
+                                padding: "3px 10px",
+                                borderRadius: "20px",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                ...statusBadgeStyle(q.status),
+                              }}
+                            >
+                              {q.status}
+                            </span>
+                            <Text variant="label-default-s" onBackground="neutral-weak">
+                              {fmt(q.createdAt)}
+                            </Text>
+                            <div style={{ display: "flex", gap: "6px" }}>
+                              <Button variant="secondary" size="s" onClick={() => setViewQuery(q)}>View</Button>
+                              {q.status !== "Resolved" && (
+                                <>
+                                  <Button variant="secondary" size="s" onClick={() => setReplyQuery(q)}>Reply</Button>
+                                  <Button variant="primary" size="s" onClick={() => handleResolve(q)}>Resolve</Button>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </Column>
+                    </>
+                  )}
+                </Column>
+              </RevealFx>
+
             </Row>
           </Column>
         </Column>
       </RevealFx>
+
 
       {/* Modals */}
       {viewQuery && <ViewModal query={viewQuery} onClose={() => setViewQuery(null)} />}
@@ -573,6 +611,7 @@ export default function Dashboard() {
           onSaved={handleReplySaved}
         />
       )}
+
     </Column>
   );
 }

@@ -23,12 +23,18 @@ const routes: RoutesConfig = {
   "/login/admin": true,
   "/dashboard": true,
   "/dashboard/hospital": true,
+
+  "/dashboard/hospital/blood-availability": true,
+  "/dashboard/hospital/patients": true,
+  "/dashboard/hospital/attendance": true,
+  "/dashboard/hospital/medicines": true,
   "/dashboard/rooms": true,
+
   "/admin/verify-requests": true,
 };
 
 const display: DisplayConfig = {
-  location: true,
+  location: false,
   time: true,
   themeSwitcher: true,
 };
