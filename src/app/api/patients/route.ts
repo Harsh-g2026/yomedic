@@ -15,7 +15,7 @@ export async function GET() {
         { updatedAt: 'desc' }
       ]
     })
-    const mapped = rows.map(p => ({
+    const mapped = rows.map((p: any) => ({
       id: p.id,
       registration_date: p.registrationDate,
       visit_type: p.visitType,
