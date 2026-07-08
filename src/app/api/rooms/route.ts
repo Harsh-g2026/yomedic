@@ -68,7 +68,7 @@ export async function POST(request: Request) {
 
     const totalBeds = totalRooms * bedsPerRoom;
 
-    const created = await prisma.$transaction(async (tx) => {
+    const created = await prisma.$transaction(async (tx: any) => {
       const category = await tx.roomCategory.create({
         data: {
           roomType: roomType.trim(),

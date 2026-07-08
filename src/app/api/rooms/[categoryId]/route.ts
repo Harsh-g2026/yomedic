@@ -187,7 +187,7 @@ export async function PATCH(
 
     const prefix = derivePrefix(currentRooms[0]?.roomNumber, category.roomType);
 
-    const updated = await prisma.$transaction(async (tx) => {
+    const updated = await prisma.$transaction(async (tx: any) => {
       // 1. Remove surplus rooms (unoccupied only, from the tail).
       let keptRooms = currentRooms;
       if (totalRooms < currentRooms.length) {

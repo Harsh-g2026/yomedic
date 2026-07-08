@@ -70,7 +70,7 @@ export async function PATCH(
       data.notes = typeof notes === "string" ? notes.trim() || null : null;
     }
 
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // 1. Update the bed itself (updatedAt is bumped automatically).
       const updatedBed = await tx.bed.update({ where: { id: bedId }, data });
 
