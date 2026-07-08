@@ -194,7 +194,7 @@ export async function PATCH(
         const needed = currentRooms.length - totalRooms;
         const toDelete = currentRooms
           .filter((r: any) => occupiedInRoom(r) === 0)
-          .sort((a, b) => roomIndex(b.roomNumber) - roomIndex(a.roomNumber))
+          .sort((a: any, b: any) => roomIndex(b.roomNumber) - roomIndex(a.roomNumber))
           .slice(0, needed);
         const deleteIds = new Set(toDelete.map((r: any) => r.id));
         await tx.room.deleteMany({ where: { id: { in: [...deleteIds] } } });
@@ -209,14 +209,14 @@ export async function PATCH(
           const removeCount = beds.length - bedsPerRoom;
           const toDelete = beds
             .filter((b: any) => b.status !== "Occupied")
-            .sort((a, b) => bedIndex(b.bedNumber) - bedIndex(a.bedNumber))
+            .sort((a: any, b: any) => bedIndex(b.bedNumber) - bedIndex(a.bedNumber))
             .slice(0, removeCount)
             .map((b: any) => b.id);
           await tx.bed.deleteMany({ where: { id: { in: toDelete } } });
         } else if (beds.length < bedsPerRoom) {
           // Append fresh Available beds, numbered after the current max.
           const addCount = bedsPerRoom - beds.length;
-          const start = beds.reduce((m, b) => Math.max(m, bedIndex(b.bedNumber)), 0);
+          const start = beds.reduce((m: any, b: any) => Math.max(m, bedIndex(b.bedNumber)), 0);
           await tx.bed.createMany({
             data: Array.from({ length: addCount }, (_, i) => ({
               roomId: room.id,
@@ -233,7 +233,7 @@ export async function PATCH(
       if (totalRooms > currentRooms.length) {
         const addCount = totalRooms - currentRooms.length;
         const startRoom = currentRooms.reduce(
-          (m, r) => Math.max(m, roomIndex(r.roomNumber)),
+          (m: any, r: any) => Math.max(m, roomIndex(r.roomNumber)),
           100,
         );
         for (let i = 0; i < addCount; i++) {
@@ -331,7 +331,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Room category not found." }, { status: 404 });
     }
 
-    const occupiedCount = category.rooms.reduce((acc, r) => {
+    const occupiedCount = category.rooms.reduce((acc: any, r: any) => {
       return acc + r.beds.filter((b: any) => b.status === "Occupied").length;
     }, 0);
 
