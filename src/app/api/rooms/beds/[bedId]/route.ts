@@ -81,7 +81,7 @@ export async function PATCH(
       });
       await tx.room.update({
         where: { id: roomId },
-        data: { status: deriveRoomStatus(roomBeds.map((b) => b.status)) },
+        data: { status: deriveRoomStatus(roomBeds.map((b: any) => b.status)) },
       });
 
       // 3. Recompute the category's aggregate counters from live bed statuses.

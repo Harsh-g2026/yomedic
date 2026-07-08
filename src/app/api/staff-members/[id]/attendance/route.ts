@@ -23,7 +23,7 @@ export async function GET(request: Request, { params }: Ctx) {
       orderBy: { date: "desc" },
     });
 
-    const mapped = rows.map((r) => ({
+    const mapped = rows.map((r: any) => ({
       id: r.id,
       staff_id: r.staffId,
       date: r.date,

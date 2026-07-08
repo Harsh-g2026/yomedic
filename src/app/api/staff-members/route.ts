@@ -14,7 +14,7 @@ export async function GET() {
         name: "asc",
       },
     });
-    const mapped = rows.map((m) => ({
+    const mapped = rows.map((m: any) => ({
       id: m.id,
       name: m.name,
       section_id: m.sectionId,

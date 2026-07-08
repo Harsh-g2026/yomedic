@@ -23,7 +23,7 @@ function derivePrefix(existingRoomNumber: string | undefined, roomType: string):
   }
   const initials = roomType
     .split(/\s+/)
-    .map((w) => w[0])
+    .map((w: any) => w[0])
     .join("")
     .replace(/[^A-Za-z]/g, "")
     .toUpperCase();
@@ -175,7 +175,7 @@ export async function PATCH(
       }
     }
     // Shrinking beds-per-room: every room's occupied beds must still fit.
-    const offending = currentRooms.find((r) => occupiedInRoom(r) > bedsPerRoom);
+    const offending = currentRooms.find((r: any) => occupiedInRoom(r) > bedsPerRoom);
     if (offending) {
       return NextResponse.json(
         {
@@ -193,12 +193,12 @@ export async function PATCH(
       if (totalRooms < currentRooms.length) {
         const needed = currentRooms.length - totalRooms;
         const toDelete = currentRooms
-          .filter((r) => occupiedInRoom(r) === 0)
+          .filter((r: any) => occupiedInRoom(r) === 0)
           .sort((a, b) => roomIndex(b.roomNumber) - roomIndex(a.roomNumber))
           .slice(0, needed);
-        const deleteIds = new Set(toDelete.map((r) => r.id));
+        const deleteIds = new Set(toDelete.map((r: any) => r.id));
         await tx.room.deleteMany({ where: { id: { in: [...deleteIds] } } });
-        keptRooms = currentRooms.filter((r) => !deleteIds.has(r.id));
+        keptRooms = currentRooms.filter((r: any) => !deleteIds.has(r.id));
       }
 
       // 2. Reconcile each kept room's bed count to bedsPerRoom.
@@ -208,10 +208,10 @@ export async function PATCH(
           // Remove the highest-numbered UNOCCUPIED beds only.
           const removeCount = beds.length - bedsPerRoom;
           const toDelete = beds
-            .filter((b) => b.status !== "Occupied")
+            .filter((b: any) => b.status !== "Occupied")
             .sort((a, b) => bedIndex(b.bedNumber) - bedIndex(a.bedNumber))
             .slice(0, removeCount)
-            .map((b) => b.id);
+            .map((b: any) => b.id);
           await tx.bed.deleteMany({ where: { id: { in: toDelete } } });
         } else if (beds.length < bedsPerRoom) {
           // Append fresh Available beds, numbered after the current max.
@@ -262,16 +262,16 @@ export async function PATCH(
         include: { beds: { select: { status: true } } },
       });
       for (const room of freshRooms) {
-        const derived = deriveRoomStatus(room.beds.map((b) => b.status));
+        const derived = deriveRoomStatus(room.beds.map((b: any) => b.status));
         if (derived !== room.status) {
           await tx.room.update({ where: { id: room.id }, data: { status: derived } });
         }
       }
 
-      const allStatuses = freshRooms.flatMap((r) => r.beds.map((b) => b.status));
+      const allStatuses = freshRooms.flatMap((r: any) => r.beds.map((b: any) => b.status));
       const totalBeds = allStatuses.length;
-      const occupiedCount = allStatuses.filter((s) => s === "Occupied").length;
-      const availableCount = allStatuses.filter((s) => s === "Available").length;
+      const occupiedCount = allStatuses.filter((s: any) => s === "Occupied").length;
+      const availableCount = allStatuses.filter((s: any) => s === "Available").length;
       const { occupiedBeds, availableBeds, occupancyPercentage } = computeOccupancy(
         totalBeds,
         occupiedCount,
@@ -332,7 +332,7 @@ export async function DELETE(
     }
 
     const occupiedCount = category.rooms.reduce((acc, r) => {
-      return acc + r.beds.filter((b) => b.status === "Occupied").length;
+      return acc + r.beds.filter((b: any) => b.status === "Occupied").length;
     }, 0);
 
     if (occupiedCount > 0) {
