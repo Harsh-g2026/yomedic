@@ -163,7 +163,7 @@ export async function PATCH(
     // ── Feasibility checks (reject before mutating anything) ─────────────────
     // Removing rooms: only unoccupied ones may go.
     if (totalRooms < currentRooms.length) {
-      const removable = currentRooms.filter((r) => occupiedInRoom(r) === 0).length;
+      const removable = currentRooms.filter((r: any) => occupiedInRoom(r) === 0).length;
       const needed = currentRooms.length - totalRooms;
       if (removable < needed) {
         return NextResponse.json(
