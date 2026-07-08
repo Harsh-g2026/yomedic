@@ -158,7 +158,7 @@ export async function PATCH(
 
     const currentRooms = category.rooms;
     const occupiedInRoom = (room: (typeof currentRooms)[number]) =>
-      room.beds.filter((b) => b.status === "Occupied").length;
+      room.beds.filter((b: any) => b.status === "Occupied").length;
 
     // ── Feasibility checks (reject before mutating anything) ─────────────────
     // Removing rooms: only unoccupied ones may go.
